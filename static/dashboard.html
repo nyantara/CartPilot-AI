@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CartPilot AI — Merchant Operations Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0070ba;
+            --primary-dark: #005ea6;
+            --primary-light: #eff6ff;
+            --paypal-gold: #ffc439;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --success: #10b981;
+            --success-bg: #ecfdf5;
+            --warning: #f59e0b;
+            --warning-bg: #fffbeb;
+            --danger: #ef4444;
+            --danger-bg: #fef2f2;
+            --gray: #6b7280;
+            --gray-bg: #f3f4f6;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background: #ffffff;
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .brand-logo {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .badge-sandbox {
+            background: #e0f2fe;
+            color: #0369a1;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 0.25rem 0.6rem;
+            border-radius: 9999px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .header-nav {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.5rem 0.9rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.15s ease;
+            border: 1px solid transparent;
+        }
+
+        .btn-outline {
+            background: #fff;
+            border-color: var(--border);
+            color: var(--text-main);
+        }
+
+        .btn-outline:hover {
+            background: #f1f5f9;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .container {
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 2rem;
+            flex: 1;
+        }
+
+        .page-title-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .live-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.8rem;
+            color: var(--success);
+            font-weight: 600;
+        }
+
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6);
+            }
+            70% {
+                box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+            }
+        }
+
+        /* KPI Cards Grid */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.25rem;
+            margin-bottom: 2rem;
+        }
+
+        .kpi-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+        }
+
+        .kpi-label {
+            font-size: 0.825rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .kpi-value {
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: var(--text-main);
+        }
+
+        .kpi-sub {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* Layout Grid */
+        .content-layout {
+            display: grid;
+            grid-template-columns: 2.5fr 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 1024px) {
+            .content-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        .panel-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        /* Filter Controls */
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .filter-btn {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 0.35rem 0.65rem;
+            font-size: 0.775rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+
+        .filter-btn.active {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+        }
+
+        .search-box {
+            padding: 0.4rem 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.85rem;
+            outline: none;
+            width: 200px;
+        }
+
+        .search-box:focus {
+            border-color: var(--primary);
+        }
+
+        /* Orders Table */
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+
+        th {
+            text-align: left;
+            padding: 0.75rem 1rem;
+            background: #f8fafc;
+            color: var(--text-muted);
+            font-weight: 600;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        td {
+            padding: 0.85rem 1rem;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+
+        tr:hover td {
+            background: #f8fafc;
+        }
+
+        .status-badge {
+            display: inline-block;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 0.2rem 0.55rem;
+            border-radius: 9999px;
+            text-transform: uppercase;
+        }
+
+        .status-COMPLETED {
+            background: var(--success-bg);
+            color: var(--success);
+        }
+
+        .status-PENDING {
+            background: var(--warning-bg);
+            color: var(--warning);
+        }
+
+        .status-FAILED {
+            background: var(--danger-bg);
+            color: var(--danger);
+        }
+
+        .status-CANCELLED {
+            background: var(--gray-bg);
+            color: var(--gray);
+        }
+
+        .id-pill {
+            font-family: monospace;
+            background: #f1f5f9;
+            padding: 0.2rem 0.45rem;
+            border-radius: 4px;
+            font-size: 0.775rem;
+            color: #334155;
+            cursor: pointer;
+        }
+
+        .id-pill:hover {
+            background: #e2e8f0;
+        }
+
+        /* Low Stock Alerts */
+        .stock-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px dashed var(--border);
+            font-size: 0.85rem;
+        }
+
+        .stock-item:last-child {
+            border-bottom: none;
+        }
+
+        .stock-item-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+        }
+
+        .stock-name {
+            font-weight: 600;
+        }
+
+        .stock-sku {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-family: monospace;
+        }
+
+        .stock-badge {
+            background: var(--danger-bg);
+            color: var(--danger);
+            font-weight: 700;
+            padding: 0.25rem 0.55rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+        }
+
+        .loading-state {
+            padding: 3rem 1rem;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* Order Details Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 23, 42, 0.45);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+
+        .modal-overlay.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-card {
+            background: #fff;
+            width: 100%;
+            max-width: 600px;
+            border-radius: 14px;
+            padding: 1.5rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0.85rem;
+            margin-bottom: 1rem;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.25rem;
+            cursor: pointer;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <header>
+        <div class="header-left">
+            <a href="/" class="brand-logo">
+                <span>🛒</span> CartPilot AI
+            </a>
+            <span class="badge-sandbox">Merchant Operations</span>
+        </div>
+        <div class="header-nav">
+            <a href="/static/index.html" class="btn btn-outline">🛍️ Customer Store</a>
+            <a href="/static/checkout.html" class="btn btn-outline">💳 PayPal Checkout</a>
+            <a href="/docs" target="_blank" class="btn btn-outline">📚 API Docs</a>
+            <button id="refreshBtn" class="btn btn-primary">🔄 Refresh</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Title & Live Bar -->
+        <div class="page-title-row">
+            <div>
+                <h1 class="page-title">Merchant Analytics & PayPal Orders</h1>
+                <p style="color: var(--text-muted); font-size: 0.875rem; margin-top: 0.25rem;">
+                    Real-time monitoring of customer purchases, payment verification, and inventory levels.
+                </p>
+            </div>
+            <div class="live-indicator">
+                <span class="pulse-dot"></span>
+                <span>Live SQLite Grounding</span>
+            </div>
+        </div>
+
+        <!-- KPI Metrics Grid -->
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-label">
+                    <span>Total Revenue (USD)</span>
+                    <span>💰</span>
+                </div>
+                <div class="kpi-value" id="kpiRevenue">$0.00</div>
+                <div class="kpi-sub" id="kpiSuccessfulCount">0 successful captures</div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-label">
+                    <span>Orders Placed</span>
+                    <span>📦</span>
+                </div>
+                <div class="kpi-value" id="kpiTotalOrders">0</div>
+                <div class="kpi-sub" id="kpiSuccessRate">0% capture success rate</div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-label">
+                    <span>Pending Payments</span>
+                    <span>⏳</span>
+                </div>
+                <div class="kpi-value" id="kpiPending" style="color: var(--warning);">0</div>
+                <div class="kpi-sub">Awaiting PayPal capture</div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-label">
+                    <span>Cancelled / Failed</span>
+                    <span>⚠️</span>
+                </div>
+                <div class="kpi-value" id="kpiFailedCancelled" style="color: var(--danger);">0</div>
+                <div class="kpi-sub" id="kpiFailedSub">0 cancelled, 0 failed</div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-label">
+                    <span>Catalogue Products</span>
+                    <span>📑</span>
+                </div>
+                <div class="kpi-value" id="kpiCatalogue">0</div>
+                <div class="kpi-sub" id="kpiLowStockCount">0 items with low stock</div>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="content-layout">
+            <!-- Left: Orders Table -->
+            <div class="panel">
+                <div class="panel-header">
+                    <h2 class="panel-title">Recent PayPal Orders</h2>
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        <input type="text" id="orderSearch" class="search-box" placeholder="Filter by ID, buyer..." />
+                        <div class="filter-group">
+                            <button class="filter-btn active" data-filter="ALL">All</button>
+                            <button class="filter-btn" data-filter="COMPLETED">Completed</button>
+                            <button class="filter-btn" data-filter="PENDING">Pending</button>
+                            <button class="filter-btn" data-filter="CANCELLED">Cancelled</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table id="ordersTable">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Items</th>
+                                <th>Total</th>
+                                <th>PayPal Order</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersTableBody">
+                            <tr>
+                                <td colspan="7" class="loading-state">Loading order history...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Right: Low Stock & Store Health -->
+            <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2 class="panel-title">Low Stock Alerts</h2>
+                        <span style="font-size: 0.75rem; color: var(--danger); font-weight: 600;">Threshold: ≤ 20</span>
+                    </div>
+                    <div id="lowStockList">
+                        <div class="loading-state">Checking stock...</div>
+                    </div>
+                </div>
+
+                <!-- PayPal Sandbox Quick Reference -->
+                <div class="panel" style="background: #f8fafc; border-style: dashed;">
+                    <h3 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 0.5rem;">PayPal Sandbox Quick Info</h3>
+                    <div style="font-size: 0.8rem; line-height: 1.6; color: var(--text-muted);">
+                        <div><strong>Merchant:</strong> <span style="font-size: 0.75rem; color: #334155;">Configured in <code>.env</code> (Sandbox Business)</span></div>
+                        <div style="margin-top: 0.35rem;"><strong>API Base:</strong> <code>https://api-m.sandbox.paypal.com</code></div>
+                        <div style="margin-top: 0.35rem;"><strong>Currency:</strong> USD</div>
+                        <div style="margin-top: 0.35rem;"><strong>Integration:</strong> Orders API v2 (Capture intent, Server-side verification)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Detail Modal -->
+    <div id="orderModal" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 style="font-size: 1.1rem; font-weight: 700;">Order Details</h3>
+                <button id="modalCloseBtn" class="modal-close">&times;</button>
+            </div>
+            <div id="modalContent" style="font-size: 0.875rem;"></div>
+        </div>
+    </div>
+
+    <script>
+        let allOrders = [];
+        let activeFilter = "ALL";
+
+        async function fetchDashboard() {
+            try {
+                const res = await fetch("/api/dashboard/summary");
+                if (!res.ok) throw new Error("Failed to load dashboard metrics");
+                const data = await res.json();
+                renderMetrics(data);
+                renderLowStock(data.low_stock_alerts || []);
+                allOrders = data.recent_orders || [];
+                applyFilters();
+            } catch (err) {
+                console.error("Dashboard error:", err);
+            }
+        }
+
+        function renderMetrics(data) {
+            document.getElementById("kpiRevenue").textContent = `$${data.total_sales.toFixed(2)}`;
+            document.getElementById("kpiSuccessfulCount").textContent = `${data.successful_payments} successful capture${data.successful_payments === 1 ? '' : 's'}`;
+            
+            document.getElementById("kpiTotalOrders").textContent = data.total_orders;
+            const successRate = data.total_orders > 0 
+                ? Math.round((data.successful_payments / data.total_orders) * 100) 
+                : 0;
+            document.getElementById("kpiSuccessRate").textContent = `${successRate}% capture success rate`;
+
+            document.getElementById("kpiPending").textContent = data.pending_payments;
+            document.getElementById("kpiFailedCancelled").textContent = data.cancelled_payments + data.failed_payments;
+            document.getElementById("kpiFailedSub").textContent = `${data.cancelled_payments} cancelled, ${data.failed_payments} failed`;
+
+            document.getElementById("kpiCatalogue").textContent = data.total_products;
+            const lowStockCount = (data.low_stock_alerts || []).length;
+            document.getElementById("kpiLowStockCount").textContent = `${lowStockCount} item${lowStockCount === 1 ? '' : 's'} with low stock`;
+        }
+
+        function renderLowStock(alerts) {
+            const container = document.getElementById("lowStockList");
+            if (!alerts || alerts.length === 0) {
+                container.innerHTML = `<div style="padding: 1rem 0; color: var(--text-muted); font-size: 0.85rem;">All products healthy! No items below stock threshold.</div>`;
+                return;
+            }
+
+            container.innerHTML = alerts.map(item => `
+                <div class="stock-item">
+                    <div class="stock-item-info">
+                        <span class="stock-name">${escapeHtml(item.name)}</span>
+                        <span class="stock-sku">${escapeHtml(item.sku)} • ${escapeHtml(item.category)}</span>
+                    </div>
+                    <span class="stock-badge">${item.stock} left</span>
+                </div>
+            `).join("");
+        }
+
+        function applyFilters() {
+            const query = document.getElementById("orderSearch").value.toLowerCase().trim();
+            const filtered = allOrders.filter(order => {
+                const matchesStatus = (activeFilter === "ALL") || (order.payment_status === activeFilter);
+                const matchesSearch = !query || 
+                    order.id.toLowerCase().includes(query) ||
+                    (order.customer_name && order.customer_name.toLowerCase().includes(query)) ||
+                    (order.customer_email && order.customer_email.toLowerCase().includes(query)) ||
+                    (order.paypal_order_id && order.paypal_order_id.toLowerCase().includes(query));
+                return matchesStatus && matchesSearch;
+            });
+            renderOrdersTable(filtered);
+        }
+
+        function renderOrdersTable(orders) {
+            const tbody = document.getElementById("ordersTableBody");
+            if (!orders || orders.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="loading-state">No matching orders found.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = orders.map(ord => {
+                const itemsCount = (ord.items || []).reduce((sum, itm) => sum + itm.quantity, 0);
+                const itemsDesc = (ord.items || []).map(i => `${i.quantity}x ${i.product_name}`).join(", ");
+                const truncatedDesc = itemsDesc.length > 35 ? itemsDesc.substring(0, 32) + "..." : itemsDesc;
+                const dateStr = ord.created_at ? new Date(ord.created_at).toLocaleString() : "N/A";
+                const customerDisplay = ord.customer_name || (ord.customer_email ? ord.customer_email.split('@')[0] : "Guest Buyer");
+
+                return `
+                    <tr style="cursor: pointer;" onclick="openOrderModal('${ord.id}')">
+                        <td><span class="id-pill" title="Click to view details">${ord.id.substring(0, 14)}...</span></td>
+                        <td>
+                            <div style="font-weight: 600;">${escapeHtml(customerDisplay)}</div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">${escapeHtml(ord.customer_email || 'No email')}</div>
+                        </td>
+                        <td title="${escapeHtml(itemsDesc)}">
+                            <span style="font-weight: 500;">${itemsCount} item${itemsCount === 1 ? '' : 's'}</span>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">${escapeHtml(truncatedDesc)}</div>
+                        </td>
+                        <td style="font-weight: 700;">$${ord.total_amount.toFixed(2)}</td>
+                        <td>
+                            <span class="id-pill" style="font-size: 0.725rem;">${ord.paypal_order_id || 'N/A'}</span>
+                        </td>
+                        <td>
+                            <span class="status-badge status-${ord.payment_status}">${ord.payment_status}</span>
+                        </td>
+                        <td style="font-size: 0.8rem; color: var(--text-muted);">${dateStr}</td>
+                    </tr>
+                `;
+            }).join("");
+        }
+
+        function openOrderModal(orderId) {
+            const order = allOrders.find(o => o.id === orderId);
+            if (!order) return;
+
+            const modalContent = document.getElementById("modalContent");
+            const itemsHtml = (order.items || []).map(i => `
+                <li style="display: flex; justify-content: space-between; padding: 0.4rem 0; border-bottom: 1px dashed var(--border);">
+                    <div>
+                        <div style="font-weight: 600;">${escapeHtml(i.product_name)} <span style="color: var(--text-muted);">x${i.quantity}</span></div>
+                        ${i.variant_details && Object.keys(i.variant_details).length > 0 
+                            ? `<div style="font-size: 0.775rem; color: var(--text-muted);">${Object.entries(i.variant_details).map(([k,v]) => `${k}: ${v}`).join(", ")}</div>` 
+                            : ''}
+                    </div>
+                    <div style="font-weight: 600;">$${i.subtotal.toFixed(2)}</div>
+                </li>
+            `).join("");
+
+            modalContent.innerHTML = `
+                <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="color: var(--text-muted);">Order ID:</span>
+                        <span class="id-pill">${order.id}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: var(--text-muted);">Payment Status:</span>
+                        <span class="status-badge status-${order.payment_status}">${order.payment_status}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: var(--text-muted);">PayPal Order ID:</span>
+                        <span class="id-pill">${order.paypal_order_id || 'N/A'}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: var(--text-muted);">PayPal Capture ID:</span>
+                        <span class="id-pill">${order.paypal_capture_id || 'N/A'}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: var(--text-muted);">Customer:</span>
+                        <span style="font-weight: 600;">${escapeHtml(order.customer_name || 'Guest')} (${escapeHtml(order.customer_email || 'No email')})</span>
+                    </div>
+
+                    <div style="margin-top: 0.5rem; border-top: 1px solid var(--border); padding-top: 0.75rem;">
+                        <h4 style="font-size: 0.9rem; font-weight: 700; margin-bottom: 0.5rem;">Purchased Items</h4>
+                        <ul style="list-style: none;">
+                            ${itemsHtml}
+                        </ul>
+                        <div style="display: flex; justify-content: space-between; margin-top: 0.75rem; font-size: 1.05rem; font-weight: 800;">
+                            <span>Total Amount:</span>
+                            <span>$${order.total_amount.toFixed(2)} ${order.currency}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById("orderModal").classList.add("open");
+        }
+
+        function closeModal() {
+            document.getElementById("orderModal").classList.remove("open");
+        }
+
+        function escapeHtml(text) {
+            if (!text) return "";
+            const div = document.createElement("div");
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Event Listeners
+        document.getElementById("refreshBtn").addEventListener("click", () => {
+            fetchDashboard();
+        });
+
+        document.getElementById("orderSearch").addEventListener("input", () => {
+            applyFilters();
+        });
+
+        document.querySelectorAll(".filter-btn").forEach(btn => {
+            btn.addEventListener("click", (e) => {
+                document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+                e.target.classList.add("active");
+                activeFilter = e.target.getAttribute("data-filter");
+                applyFilters();
+            });
+        });
+
+        document.getElementById("modalCloseBtn").addEventListener("click", closeModal);
+        document.getElementById("orderModal").addEventListener("click", (e) => {
+            if (e.target.id === "orderModal") closeModal();
+        });
+
+        // Auto-refresh every 15 seconds
+        setInterval(fetchDashboard, 15000);
+
+        // Initial Load
+        window.addEventListener("DOMContentLoaded", fetchDashboard);
+    </script>
+</body>
+</html>
+

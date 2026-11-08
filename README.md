@@ -230,7 +230,7 @@ When evaluating the live PayPal Sandbox checkout:
 4. **Click the PayPal Button**: The official PayPal Sandbox modal will pop up.
 5. **Log In as Buyer**:
    - Log in using a **Personal (Buyer) Sandbox account** from your [PayPal Developer Dashboard](https://developer.paypal.com) > **Sandbox** > **Accounts**.
-   - ⚠️ *Important*: Do **NOT** log in using the Merchant/Seller account (`sb-uh6va53762502@business.example.com`), as PayPal prohibits merchants from buying from themselves.
+   - ⚠️ *Important*: Do **NOT** log in using the Merchant/Seller account (`your-sandbox-merchant@business.example.com`), as PayPal prohibits merchants from buying from themselves.
    - *Tip*: If you experience browser cookie conflicts from prior PayPal sessions, test in an **Incognito / Private window**.
 6. **Complete Payment**: Click **Complete Purchase** in PayPal.
 7. **Verification**:
@@ -276,5 +276,6 @@ Try these queries in the AI assistant to experience the intelligent shopping flo
 
 This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
 
-#   C a r t P i l o t - A I  
+#   C a r t P i l o t - A I 
+ 
  

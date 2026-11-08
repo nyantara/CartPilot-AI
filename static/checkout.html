@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CartPilot AI — PayPal Sandbox Checkout</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0070ba;
+            --primary-hover: #005ea6;
+            --paypal-gold: #ffc439;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --success: #10b981;
+            --danger: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 2rem 1rem;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .container {
+            max-width: 640px;
+            width: 100%;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+            padding: 2rem;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .logo {
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .badge {
+            background: #e0f2fe;
+            color: #0369a1;
+            font-size: 0.75rem;
+            padding: 0.25rem 0.6rem;
+            border-radius: 9999px;
+            font-weight: 600;
+        }
+
+        .session-bar {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            background: #f1f5f9;
+            padding: 0.6rem 0.85rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+        }
+
+        .session-bar input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            font-family: inherit;
+            font-size: 0.85rem;
+            color: var(--text-main);
+            font-weight: 500;
+        }
+
+        .session-bar button {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            padding: 0.35rem 0.75rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .order-summary {
+            margin-bottom: 1.5rem;
+        }
+
+        .order-summary h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+
+        .cart-items {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            max-height: 240px;
+            overflow-y: auto;
+            margin-bottom: 1rem;
+        }
+
+        .cart-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.65rem 0;
+            border-bottom: 1px dashed var(--border);
+            font-size: 0.9rem;
+        }
+
+        .cart-item-title {
+            font-weight: 500;
+        }
+
+        .cart-item-variant {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .cart-item-price {
+            font-weight: 600;
+        }
+
+        .totals-block {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            margin-bottom: 0.4rem;
+        }
+
+        .total-row.final {
+            margin-top: 0.6rem;
+            padding-top: 0.6rem;
+            border-top: 1px solid var(--border);
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        #paypal-button-container {
+            margin-top: 1rem;
+            min-height: 120px;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .alert-success {
+            background: #ecfdf5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+
+        .alert-error {
+            background: #fef2f2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        .alert-warning {
+            background: #fffbeb;
+            color: #92400e;
+            border: 1px solid #fde68a;
+        }
+
+        .order-confirmation {
+            display: none;
+            text-align: center;
+            padding: 1.5rem 0;
+        }
+
+        .checkmark {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: #d1fae5;
+            color: var(--success);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            margin: 0 auto 1rem auto;
+        }
+
+        .meta-pill {
+            display: inline-block;
+            background: #f1f5f9;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.8rem;
+            margin-top: 0.25rem;
+        }
+
+        .btn-restart {
+            margin-top: 1.25rem;
+            display: inline-block;
+            background: var(--primary);
+            color: #fff;
+            padding: 0.6rem 1.25rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <span>🛒</span> CartPilot AI
+            </div>
+            <span class="badge">PayPal Sandbox</span>
+        </div>
+
+        <!-- Session Selection -->
+        <div class="session-bar">
+            <span>Session:</span>
+            <input type="text" id="sessionIdInput" value="demo-session-001" />
+            <button id="loadCartBtn">Load Cart</button>
+        </div>
+
+        <!-- Sandbox Helper Banner -->
+        <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 0.85rem 1rem; margin-bottom: 1.25rem; font-size: 0.825rem; color: #1e40af; line-height: 1.45;">
+            <strong>ℹ️ PayPal Sandbox Guide:</strong>
+            <ul style="margin-left: 1.25rem; margin-top: 0.35rem;">
+                <li><strong>Merchant:</strong> Your configured Sandbox Business Account (from <code>.env</code>)</li>
+                <li><strong>Buyer login:</strong> In the PayPal popup, sign in with your <strong>Personal Sandbox account</strong> (not the merchant email).</li>
+                <li><strong>Troubleshooting:</strong> If PayPal shows a cookie error or session loop, open this page in a <strong>Private / Incognito window</strong>.</li>
+            </ul>
+        </div>
+
+        <!-- Alerts -->
+        <div id="statusAlert" class="alert"></div>
+
+        <!-- Checkout View -->
+        <div id="checkoutView">
+            <div class="order-summary">
+                <h3>Order Items</h3>
+                <ul id="cartItemsList" class="cart-items">
+                    <li style="color: var(--text-muted); font-size: 0.85rem;">Loading cart items...</li>
+                </ul>
+
+                <div class="totals-block">
+                    <div class="total-row">
+                        <span>Items Total:</span>
+                        <span id="itemsSubtotal">$0.00</span>
+                    </div>
+                    <div class="total-row">
+                        <span>Currency:</span>
+                        <span>USD</span>
+                    </div>
+                    <div class="total-row final">
+                        <span>Total to Pay:</span>
+                        <span id="finalTotal">$0.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Customer Details (Optional) -->
+            <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+                <input type="text" id="custNameInput" placeholder="Buyer Name (e.g. John Doe)" style="flex:1; padding: 0.5rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.85rem;" />
+                <input type="email" id="custEmailInput" placeholder="Buyer Email (e.g. buyer@example.com)" style="flex:1; padding: 0.5rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.85rem;" />
+            </div>
+
+            <!-- PayPal Container -->
+            <div id="paypal-button-container"></div>
+        </div>
+
+        <!-- Order Confirmation View -->
+        <div id="confirmationView" class="order-confirmation">
+            <div class="checkmark">✓</div>
+            <h2 style="font-size: 1.35rem; margin-bottom: 0.5rem;">Payment Successful!</h2>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;">
+                Your order has been captured and verified on the backend.
+            </p>
+            <div style="text-align: left; background: #f8fafc; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; font-size: 0.85rem;">
+                <div><strong>Order ID:</strong> <span id="confOrderId" class="meta-pill"></span></div>
+                <div style="margin-top: 0.5rem;"><strong>PayPal Capture ID:</strong> <span id="confCaptureId" class="meta-pill"></span></div>
+                <div style="margin-top: 0.5rem;"><strong>Amount Paid:</strong> <span id="confAmount" style="font-weight: 600;"></span></div>
+                <div style="margin-top: 0.5rem;"><strong>Buyer Name:</strong> <span id="confPayer"></span></div>
+            </div>
+            <a href="javascript:location.reload()" class="btn-restart">Place Another Order</a>
+        </div>
+    </div>
+
+    <script>
+        let currentSessionId = "demo-session-001";
+        let currentTotal = 0;
+        let paypalButtonsRendered = false;
+
+        // Parse query param if provided
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get("session_id")) {
+            currentSessionId = urlParams.get("session_id");
+            document.getElementById("sessionIdInput").value = currentSessionId;
+        }
+
+        function showAlert(msg, type = "error") {
+            const el = document.getElementById("statusAlert");
+            el.className = `alert alert-${type}`;
+            el.textContent = msg;
+            el.style.display = "block";
+        }
+
+        function hideAlert() {
+            document.getElementById("statusAlert").style.display = "none";
+        }
+
+        // Fetch Cart from Backend
+        async function fetchCart() {
+            hideAlert();
+            currentSessionId = document.getElementById("sessionIdInput").value.trim() || "demo-session-001";
+            try {
+                const res = await fetch(`/api/cart/${currentSessionId}`);
+                if (!res.ok) throw new Error("Failed to load cart");
+                const cart = await res.json();
+                
+                const listEl = document.getElementById("cartItemsList");
+                listEl.innerHTML = "";
+                
+                if (!cart.items || cart.items.length === 0) {
+                    listEl.innerHTML = `<li style="color: var(--text-muted); font-size: 0.85rem; padding: 0.5rem 0;">Your cart is empty. Add items through the chat assistant or products catalog first.</li>`;
+                    currentTotal = 0;
+                } else {
+                    cart.items.forEach(item => {
+                        const li = document.createElement("li");
+                        li.className = "cart-item";
+                        const varText = item.selected_variants && Object.keys(item.selected_variants).length > 0
+                            ? Object.entries(item.selected_variants).map(([k, v]) => `${v}`).join(", ")
+                            : "";
+                        li.innerHTML = `
+                            <div>
+                                <div class="cart-item-title">${item.product_name} <span style="color: var(--text-muted);">x${item.quantity}</span></div>
+                                ${varText ? `<div class="cart-item-variant">${varText}</div>` : ""}
+                            </div>
+                            <div class="cart-item-price">$${item.subtotal.toFixed(2)}</div>
+                        `;
+                        listEl.appendChild(li);
+                    });
+                    currentTotal = cart.subtotal;
+                }
+
+                document.getElementById("itemsSubtotal").textContent = `$${currentTotal.toFixed(2)}`;
+                document.getElementById("finalTotal").textContent = `$${currentTotal.toFixed(2)}`;
+
+            } catch (err) {
+                showAlert(err.message, "error");
+            }
+        }
+
+        // Load PayPal SDK dynamically from /api/checkout/config
+        async function initPayPalSDK() {
+            try {
+                const configRes = await fetch("/api/checkout/config");
+                const config = await configRes.json();
+                const clientId = config.client_id || "sb";
+
+                const script = document.createElement("script");
+                script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=USD&intent=capture&components=buttons`;
+                script.onload = () => {
+                    renderPayPalButtons();
+                };
+                script.onerror = () => {
+                    showAlert("Failed to load PayPal JavaScript SDK. Check your network or client ID.", "error");
+                };
+                document.head.appendChild(script);
+            } catch (err) {
+                showAlert("Could not retrieve PayPal configuration from server.", "error");
+            }
+        }
+
+        function renderPayPalButtons() {
+            if (typeof paypal === "undefined") return;
+            const container = document.getElementById("paypal-button-container");
+            container.innerHTML = "";
+
+            paypal.Buttons({
+                style: {
+                    layout: 'vertical',
+                    color: 'gold',
+                    shape: 'rect',
+                    label: 'paypal'
+                },
+
+                // 1. Create Order on Backend
+                createOrder: async (data, actions) => {
+                    hideAlert();
+                    if (currentTotal <= 0) {
+                        showAlert("Cannot checkout with an empty cart. Please add items to your cart.", "warning");
+                        throw new Error("Empty cart");
+                    }
+
+                    const custName = document.getElementById("custNameInput").value.trim() || undefined;
+                    const custEmail = document.getElementById("custEmailInput").value.trim() || undefined;
+
+                    const res = await fetch("/api/checkout/create-order", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            session_id: currentSessionId,
+                            customer_name: custName,
+                            customer_email: custEmail
+                        })
+                    });
+
+                    const resData = await res.json();
+                    if (!res.ok) {
+                        showAlert(resData.detail || "Failed to create order on backend", "error");
+                        throw new Error(resData.detail);
+                    }
+
+                    // Return PayPal Order ID to the SDK
+                    return resData.paypal_order_id;
+                },
+
+                // 2. Capture Order on Backend upon Approval
+                onApprove: async (data, actions) => {
+                    hideAlert();
+                    showAlert("Processing and verifying payment capture on backend...", "warning");
+
+                    try {
+                        const res = await fetch(`/api/checkout/capture-order/${data.orderID}`, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ session_id: currentSessionId })
+                        });
+
+                        const captureData = await res.json();
+                        if (!res.ok) {
+                            throw new Error(captureData.detail || "Payment capture failed");
+                        }
+
+                        // Display Confirmation
+                        hideAlert();
+                        document.getElementById("checkoutView").style.display = "none";
+                        document.getElementById("confirmationView").style.display = "block";
+                        document.getElementById("confOrderId").textContent = captureData.order_id;
+                        document.getElementById("confCaptureId").textContent = captureData.capture_id || "N/A";
+                        document.getElementById("confAmount").textContent = `$${captureData.amount_captured.toFixed(2)} ${captureData.currency}`;
+                        document.getElementById("confPayer").textContent = captureData.customer_name || "N/A";
+
+                    } catch (err) {
+                        showAlert(`Payment capture error: ${err.message}`, "error");
+                    }
+                },
+
+                // 3. Customer Cancelled Modal
+                onCancel: async (data) => {
+                    showAlert("PayPal checkout was cancelled. Your cart has been preserved.", "warning");
+                    if (data && data.orderID) {
+                        fetch(`/api/checkout/cancel-order/${data.orderID}`, { method: "POST" });
+                    }
+                },
+
+                // 4. SDK Error
+                onError: (err) => {
+                    console.error("PayPal SDK Error:", err);
+                    showAlert("PayPal Error: If the popup failed to load or closed unexpectedly, ensure you logged in with a Personal Sandbox buyer account (not the merchant email) and that third-party cookies are allowed.", "error");
+                }
+            }).render('#paypal-button-container');
+        }
+
+        // Event Listeners
+        document.getElementById("loadCartBtn").addEventListener("click", () => {
+            fetchCart();
+        });
+
+        // Initial Load
+        window.addEventListener("DOMContentLoaded", () => {
+            fetchCart();
+            initPayPalSDK();
+        });
+    </script>
+</body>
+</html>
+

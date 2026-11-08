@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CartPilot AI — From Conversation to Checkout</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <header class="app-header">
+        <div style="display: flex; align-items: center;">
+            <a href="/static/index.html" class="brand">
+                <span>🛒</span> CartPilot AI
+            </a>
+            <span class="brand-tagline">AI-Powered Shopping Assistant</span>
+        </div>
+
+        <div class="header-center">
+            <span style="color: var(--text-muted); font-size: 0.75rem;">Session:</span>
+            <input type="text" id="sessionInput" class="session-input" value="demo-session-001" title="Active session identifier" />
+            <button id="newSessionBtn" class="btn-icon-sm" title="Start fresh session">🔄</button>
+        </div>
+
+        <nav class="header-nav">
+            <button id="navCartBtn" class="nav-link nav-cart-btn">
+                <span>🛒 Cart</span>
+                <span id="navCartCount" class="cart-count-badge">0</span>
+            </button>
+            <a href="/static/dashboard.html" class="nav-link">📊 Merchant Dashboard</a>
+            <a href="/static/checkout.html" class="nav-link">💳 Standalone Checkout</a>
+            <a href="/docs" target="_blank" class="nav-link">📚 API</a>
+        </nav>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="main-layout">
+        
+        <!-- Left: AI Chat Shopping Assistant -->
+        <section class="chat-container">
+            <div class="chat-header">
+                <div class="chat-header-title">
+                    <span>✨ CartPilot Shopping Assistant</span>
+                </div>
+                <div class="ai-status-pill">
+                    <span class="ai-pulse"></span>
+                    <span>Catalogue-Grounded AI</span>
+                </div>
+            </div>
+
+            <!-- Messages Stream -->
+            <div id="chatMessages" class="chat-messages">
+                <!-- Welcome AI Message -->
+                <div class="message-row assistant">
+                    <div class="msg-avatar ai-av">🤖</div>
+                    <div class="msg-body">
+                        <div class="msg-bubble">
+                            <p><strong>Hello! I'm CartPilot AI, your personal shopping assistant.</strong></p>
+                            <p>Tell me what you're looking for, mention your budget, or specify any preferences (e.g. <em>"I need two hardcover notebooks in A5 and a blue gel pen under $30"</em>). I'll search our catalogue, check live stock, and prepare your cart for instant PayPal checkout!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Suggested Prompt Chips -->
+            <div class="chat-suggestions">
+                <button class="suggestion-chip">📝 2 Executive Notebooks (A5)</button>
+                <button class="suggestion-chip">📚 Computer Science books</button>
+                <button class="suggestion-chip">🎁 Gift for colleague under $30</button>
+                <button class="suggestion-chip">✒️ Metal Gel Pen (Blue)</button>
+                <button class="suggestion-chip">💼 Desk Mat and Laptop Stand</button>
+            </div>
+
+            <!-- Chat Input Area -->
+            <div class="chat-input-area">
+                <div class="input-box-wrapper">
+                    <input type="text" id="chatInput" class="chat-input" placeholder="Type what you need (e.g., 'Add 2 blue gel pens and a leather desk mat')..." autocomplete="off" />
+                    <button id="sendBtn" class="btn-send" title="Send message">➔</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Right: Dual-Tab Side Panel (Live Cart & Storefront Explorer) -->
+        <aside class="side-panel">
+            <div class="tabs-nav">
+                <button class="tab-btn active" data-tab="cart">
+                    <span>🛒</span> Shopping Cart
+                </button>
+                <button class="tab-btn" data-tab="catalogue">
+                    <span>📑</span> Explore Products
+                </button>
+            </div>
+
+            <!-- Tab 1: Live Persistent Cart -->
+            <div id="cartTabContent" class="tab-content active">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                    <span style="font-size: 0.825rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase;">Current Items</span>
+                    <button id="clearCartBtn" style="background: none; border: none; font-size: 0.75rem; color: var(--text-muted); cursor: pointer;">Empty Cart</button>
+                </div>
+
+                <div id="cartItemsList" class="cart-items-container">
+                    <div class="empty-cart-view">
+                        <div class="empty-icon">🛒</div>
+                        <div style="font-weight: 600;">Your cart is empty</div>
+                    </div>
+                </div>
+
+                <!-- Totals & PayPal Container -->
+                <div id="cartSummaryBlock" class="cart-summary-box" style="display: none;">
+                    <div class="cart-summary-row">
+                        <span>Items Subtotal:</span>
+                        <span id="cartSubtotal" style="font-weight: 600;">$0.00</span>
+                    </div>
+                    <div class="cart-summary-row total-row">
+                        <span>Total to Pay:</span>
+                        <span id="cartTotal">$0.00</span>
+                    </div>
+                </div>
+
+                <!-- PayPal Smart Buttons -->
+                <div id="cart-paypal-container" style="display: none;"></div>
+            </div>
+
+            <!-- Tab 2: Storefront Catalogue Explorer -->
+            <div id="catalogueTabContent" class="tab-content">
+                <!-- Category Filter Pills -->
+                <div class="cat-filter-bar">
+                    <button class="cat-pill active" data-cat="ALL">All Items</button>
+                    <button class="cat-pill" data-cat="Stationery">Stationery</button>
+                    <button class="cat-pill" data-cat="Books">Books</button>
+                    <button class="cat-pill" data-cat="Accessories">Accessories</button>
+                    <button class="cat-pill" data-cat="Personalised Gifts">Gifts</button>
+                </div>
+
+                <!-- Products Grid -->
+                <div id="catalogueGrid" class="catalogue-grid">
+                    <div style="padding: 2rem; text-align: center; color: var(--text-muted);">Loading catalogue...</div>
+                </div>
+            </div>
+        </aside>
+
+    </main>
+
+    <!-- Payment Success Modal -->
+    <div id="successModal" class="success-overlay">
+        <div class="success-box">
+            <div class="success-icon-wrap">✓</div>
+            <h2 style="font-size: 1.35rem; font-weight: 800; margin-bottom: 0.5rem;">Payment Verified!</h2>
+            <p style="color: var(--text-secondary); font-size: 0.875rem;">
+                Your PayPal payment was captured and recorded in the database.
+            </p>
+
+            <div class="order-meta-box">
+                <div><strong>Order ID:</strong> <span id="modalOrderId" style="font-family: monospace;"></span></div>
+                <div><strong>PayPal Capture ID:</strong> <span id="modalCaptureId" style="font-family: monospace;"></span></div>
+                <div><strong>Amount Paid:</strong> <span id="modalAmount" style="font-weight: 700; color: var(--primary);"></span></div>
+                <div><strong>Payer:</strong> <span id="modalPayer"></span></div>
+            </div>
+
+            <button id="modalCloseBtn" class="btn-card-add" style="width: 100%; padding: 0.75rem; font-size: 0.9rem;">
+                Continue Shopping
+            </button>
+        </div>
+    </div>
+
+    <!-- App Script -->
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
+
